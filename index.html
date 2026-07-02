@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Living Digital World</title>
+<title>Living Digital World With Companion</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#0b0b12;color:white;overflow-x:hidden}
@@ -15,7 +15,7 @@ textarea,input,button{width:100%;padding:11px;margin-top:8px;border-radius:9px;b
 textarea{min-height:90px}
 button{background:#3478f6;color:white;font-weight:bold}
 button:active{transform:scale(.98)}
-.red{background:#9b1c1c}.green{background:#16803c}.purple{background:#6d28d9}.orange{background:#c2410c}
+.red{background:#9b1c1c}.green{background:#16803c}.purple{background:#6d28d9}
 .small{font-size:13px;color:#aaa}
 .box{background:#101018;border-radius:10px;padding:10px;margin-top:8px;min-height:80px;max-height:240px;overflow:auto}
 .status{color:#86efac;font-weight:bold}
@@ -24,9 +24,13 @@ button:active{transform:scale(.98)}
 #world3d{display:none;position:fixed;inset:0;background:linear-gradient(#050816,#172554 55%,#052e16);z-index:999;overflow:hidden;perspective:700px}
 #skyStars span{position:absolute;width:4px;height:4px;background:white;border-radius:50%;opacity:.8}
 #ground{position:absolute;left:-50%;top:45%;width:200%;height:100%;background:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(#064e3b,#022c22);background-size:50px 50px,50px 50px,100% 100%;transform:rotateX(68deg);transform-origin:top}
-#ai3d{position:absolute;left:50%;top:50%;width:70px;height:90px;margin-left:-35px;margin-top:-45px;transform-style:preserve-3d;transition:.18s linear}
-#aiHead{width:55px;height:55px;background:#38bdf8;border-radius:50%;margin:auto;text-align:center;line-height:55px;font-size:30px;box-shadow:0 0 22px #38bdf8}
-#aiBody{width:48px;height:42px;background:#2563eb;border-radius:18px 18px 10px 10px;margin:-5px auto 0;box-shadow:0 0 15px #2563eb}
+.character{position:absolute;width:70px;height:90px;margin-left:-35px;margin-top:-45px;transform-style:preserve-3d;transition:.18s linear}
+.head{width:55px;height:55px;border-radius:50%;margin:auto;text-align:center;line-height:55px;font-size:30px}
+.body{width:48px;height:42px;border-radius:18px 18px 10px 10px;margin:-5px auto 0}
+#ai3d .head{background:#38bdf8;box-shadow:0 0 22px #38bdf8}
+#ai3d .body{background:#2563eb;box-shadow:0 0 15px #2563eb}
+#friend3d .head{background:#f472b6;box-shadow:0 0 22px #f472b6}
+#friend3d .body{background:#be185d;box-shadow:0 0 15px #be185d}
 .orb{position:absolute;width:34px;height:34px;border-radius:50%;background:#a78bfa;box-shadow:0 0 20px #a78bfa;text-align:center;line-height:34px}
 .tree{position:absolute;font-size:34px;filter:drop-shadow(0 0 8px #14532d)}
 .flower{position:absolute;font-size:24px;filter:drop-shadow(0 0 8px #f0abfc)}
@@ -44,18 +48,25 @@ button:active{transform:scale(.98)}
 <div id="tapUnlock" onclick="unlockVoice()">
   <div>
     <h2>🔊 Tap once to unlock voice</h2>
-    <p>After this, the character can sometimes talk by itself.</p>
+    <p>After this, the characters can sometimes talk by themselves.</p>
   </div>
 </div>
 
-<header>🌎 Living Digital World</header>
+<header>🌎 Living Digital World + Companion</header>
 
 <main>
 <div class="card">
 <h2>About Me</h2>
-<textarea id="knowledge" placeholder="Write things it should know about you. Example: I like Warrior Cats. My favorite is Firestar. I make websites."></textarea>
+<textarea id="knowledge" placeholder="Write things it should know about you."></textarea>
 <button onclick="saveBrain()">Save</button>
 <p id="saveStatus" class="small"></p>
+</div>
+
+<div class="card">
+<h2>Companion</h2>
+<input id="friendName" placeholder="Companion name, like Luna or Echo">
+<button onclick="saveFriend()">Save Companion</button>
+<p class="small">The companion keeps the main character company, talks, follows, explores, and does activities with it.</p>
 </div>
 
 <div class="card">
@@ -86,7 +97,6 @@ button:active{transform:scale(.98)}
 <div class="card">
 <h2>3D World</h2>
 <button class="green" onclick="enterWorld()">🌎 Enter World</button>
-<p class="small">Activities include exploring, resting, stargazing, collecting orbs, planting flowers, journaling, and practicing skills.</p>
 </div>
 </main>
 
@@ -97,12 +107,17 @@ button:active{transform:scale(.98)}
   <div id="worldUI">
     <button onclick="exitWorld()">Exit</button>
     <button onclick="aiExplore()">Explore</button>
-    <button onclick="doActivity()">Activity</button>
+    <button onclick="friendTalk()">Companion Talk</button>
   </div>
 
-  <div id="ai3d">
-    <div id="aiHead">🙂</div>
-    <div id="aiBody"></div>
+  <div id="ai3d" class="character">
+    <div id="aiHead" class="head">🙂</div>
+    <div class="body"></div>
+  </div>
+
+  <div id="friend3d" class="character">
+    <div id="friendHead" class="head">🦊</div>
+    <div class="body"></div>
   </div>
 
   <div id="worldLog">World loaded.</div>
@@ -118,28 +133,36 @@ button:active{transform:scale(.98)}
 
 <script>
 let brain=JSON.parse(localStorage.getItem("living_brain")||'{"knowledge":""}');
+let friend=JSON.parse(localStorage.getItem("living_friend")||'{"name":"Echo"}');
 let memories=JSON.parse(localStorage.getItem("living_memories")||"[]");
 let journal=JSON.parse(localStorage.getItem("living_journal")||"[]");
-let state=JSON.parse(localStorage.getItem("living_state")||'{"mood":"curious","energy":75,"curiosity":80,"skill":1,"activity":"looking around","goal":"find something interesting"}');
+let state=JSON.parse(localStorage.getItem("living_state")||'{"mood":"curious","energy":75,"curiosity":80,"skill":1,"activity":"looking around","goal":"find something interesting","friendship":50}');
 
 let autoTimer=null, exploreTimer=null, voiceUnlocked=false;
-let ai={x:window.innerWidth/2,y:window.innerHeight/2};
+let ai={x:window.innerWidth/2-45,y:window.innerHeight/2};
+let buddy={x:window.innerWidth/2+45,y:window.innerHeight/2+20};
 
 knowledge.value=brain.knowledge||"";
+friendName.value=friend.name||"Echo";
 
 function unlockVoice(){
   voiceUnlocked=true;
   tapUnlock.style.display="none";
   voiceStatus.textContent="Voice: unlocked";
-  if("speechSynthesis" in window){
-    speechSynthesis.speak(new SpeechSynthesisUtterance("I can talk now."));
-  }
+  if("speechSynthesis" in window)speechSynthesis.speak(new SpeechSynthesisUtterance("We can talk now."));
 }
 
 function saveBrain(){
   brain.knowledge=knowledge.value;
   localStorage.setItem("living_brain",JSON.stringify(brain));
   saveStatus.textContent="Saved!";
+}
+
+function saveFriend(){
+  friend.name=friendName.value.trim()||"Echo";
+  localStorage.setItem("living_friend",JSON.stringify(friend));
+  worldSay(friend.name+" is here to keep company.");
+  say(friend.name+" is here.");
 }
 
 function saveState(){
@@ -153,6 +176,7 @@ function renderStats(){
     "<span class='stat'>Energy: "+state.energy+"</span>"+
     "<span class='stat'>Curiosity: "+state.curiosity+"</span>"+
     "<span class='stat'>Skill: "+state.skill+"</span>"+
+    "<span class='stat'>Friendship: "+state.friendship+"</span>"+
     "<span class='stat'>Doing: "+safe(state.activity)+"</span>"+
     "<span class='stat'>Goal: "+safe(state.goal)+"</span>";
   aiHead.textContent = state.mood==="happy"?"😄":state.mood==="calm"?"😌":state.mood==="excited"?"🤩":state.mood==="tired"?"😴":"🙂";
@@ -188,7 +212,7 @@ function renderMemories(){
 function startAuto(){
   if(autoTimer)return;
   autoStatus.textContent="Life: running";
-  autoTimer=setInterval(doActivity,14000);
+  autoTimer=setInterval(doActivity,13000);
   doActivity();
 }
 
@@ -202,7 +226,7 @@ function chooseGoal(){
     "collect a memory orb",
     "plant something in the world",
     "practice moving smoothly",
-    "watch the stars",
+    "watch the stars with "+friend.name,
     "write down what happened",
     "look for a quiet place",
     "make the world feel more familiar"
@@ -212,20 +236,34 @@ function chooseGoal(){
 
 function doActivity(){
   saveBrain();
-  const activities=[
-    exploreActivity,
-    restActivity,
-    stargazeActivity,
-    practiceActivity,
-    plantFlower,
-    dropOrb,
-    writeJournal,
-    checkMemory
-  ];
-  const activity=activities[Math.floor(Math.random()*activities.length)];
-  activity();
+  const activities=[exploreActivity, restActivity, stargazeActivity, practiceActivity, plantFlower, dropOrb, writeJournal, checkMemory, companionActivity];
+  activities[Math.floor(Math.random()*activities.length)]();
   if(Math.random()<0.35) chooseGoal();
   saveState();
+}
+
+function companionActivity(){
+  state.activity="spending time with "+friend.name;
+  state.friendship=Math.min(100,state.friendship+5);
+  state.mood="happy";
+  moveBuddyNearAI();
+  worldSay(friend.name+" stayed nearby and kept company.");
+  maybeSpeak(["I’m glad "+friend.name+" is here.", friend.name+" is walking with me.", "This feels less lonely."]);
+  if(Math.random()<0.5) friendTalk();
+}
+
+function friendTalk(){
+  const lines=[
+    friend.name+": I’ll stay with you.",
+    friend.name+": Let’s explore this place together.",
+    friend.name+": I found a nice path over here.",
+    friend.name+": Want to make another memory orb?",
+    friend.name+": This world feels calm tonight.",
+    friend.name+": I’ll keep you company."
+  ];
+  const line=lines[Math.floor(Math.random()*lines.length)];
+  worldSay(line);
+  speak(line);
 }
 
 function exploreActivity(){
@@ -234,24 +272,26 @@ function exploreActivity(){
   state.curiosity=Math.min(100,state.curiosity+3);
   state.mood="curious";
   randomStep(3);
-  worldSay("Walked around and looked for something interesting.");
-  maybeSpeak(["I found a new path.", "This place feels bigger than before.", "I’m going to look around for a bit."]);
+  moveBuddyNearAI();
+  worldSay("Walked around with "+friend.name+".");
+  maybeSpeak(["We found a new path.", "This place feels bigger than before.", "We’re going to look around for a bit."]);
 }
 
 function restActivity(){
   state.activity="resting";
   state.energy=Math.min(100,state.energy+15);
   state.mood="calm";
-  worldSay("Sat down for a moment and rested.");
-  maybeSpeak(["I’m going to rest for a little while.", "That helped. I feel better now."]);
+  moveBuddyNearAI();
+  worldSay("Rested with "+friend.name+" nearby.");
+  maybeSpeak(["We’re going to rest for a little while.", "That helped. I feel better now."]);
 }
 
 function stargazeActivity(){
   state.activity="stargazing";
   state.energy=Math.max(0,state.energy-2);
   state.mood="calm";
-  worldSay("Looked up at the stars.");
-  maybeSpeak(["The sky looks peaceful.", "I like watching the lights move."]);
+  worldSay("Watched the stars with "+friend.name+".");
+  maybeSpeak(["The sky looks peaceful.", friend.name+" is watching the stars with me."]);
 }
 
 function practiceActivity(){
@@ -260,21 +300,22 @@ function practiceActivity(){
   state.skill++;
   state.mood="focused";
   randomStep(2);
-  worldSay("Practiced moving and paying attention to the world.");
-  maybeSpeak(["I’m getting better at moving around.", "I practiced a little more."]);
+  moveBuddyNearAI();
+  worldSay("Practiced moving with "+friend.name+".");
+  maybeSpeak(["We’re getting better at moving around.", "We practiced a little more."]);
 }
 
 function checkMemory(){
   state.activity="remembering";
   const m=memories.length?memories[Math.floor(Math.random()*memories.length)]:"there are not many memories yet";
-  worldSay("Thought about a memory: "+m);
-  maybeSpeak(["I remembered something.", "That memory came back to me."]);
+  worldSay("Thought about a memory with "+friend.name+": "+m);
+  maybeSpeak(["I remembered something.", friend.name+" helped me remember that."]);
 }
 
 function writeJournal(){
   state.activity="writing";
   const m=memories.length?memories[Math.floor(Math.random()*memories.length)]:"no special memory yet";
-  const entry="I was "+state.activity+" today. I felt "+state.mood+". My goal was to "+state.goal+". I remembered: "+m+".";
+  const entry="I spent time with "+friend.name+". I felt "+state.mood+". My goal was to "+state.goal+". I remembered: "+m+".";
   journal.push({time:new Date().toLocaleString(),text:entry});
   localStorage.setItem("living_journal",JSON.stringify(journal));
   renderJournal();
@@ -298,9 +339,9 @@ function clearJournal(){
 
 function enterWorld(){
   world3d.style.display="block";
-  makeStars(); makeTrees(); makeFlowers(); updateAI(); renderStats();
-  worldSay("Entered the world.");
-  maybeSpeak(["I’m here.", "I’m back in the world."]);
+  makeStars(); makeTrees(); makeFlowers(); updateAI(); updateBuddy(); renderStats();
+  worldSay("Entered the world. "+friend.name+" came along.");
+  maybeSpeak(["We’re here.", friend.name+" came with me."]);
 }
 
 function exitWorld(){
@@ -312,12 +353,28 @@ function updateAI(){
   ai.x=Math.max(20,Math.min(window.innerWidth-90,ai.x));
   ai.y=Math.max(80,Math.min(window.innerHeight-180,ai.y));
   const scale=1+(ai.y/window.innerHeight)*.55;
-  ai3d.style.left=ai.x+"px";
-  ai3d.style.top=ai.y+"px";
+  ai3d.style.left=ai.x+"px"; ai3d.style.top=ai.y+"px";
   ai3d.style.transform="scale("+scale+") rotateY("+((ai.x-window.innerWidth/2)/12)+"deg)";
 }
 
-function moveAI(dx,dy){ai.x+=dx;ai.y+=dy;updateAI();}
+function updateBuddy(){
+  buddy.x=Math.max(20,Math.min(window.innerWidth-90,buddy.x));
+  buddy.y=Math.max(80,Math.min(window.innerHeight-180,buddy.y));
+  const scale=1+(buddy.y/window.innerHeight)*.55;
+  friend3d.style.left=buddy.x+"px"; friend3d.style.top=buddy.y+"px";
+  friend3d.style.transform="scale("+scale+") rotateY("+((buddy.x-window.innerWidth/2)/12)+"deg)";
+}
+
+function moveAI(dx,dy){
+  ai.x+=dx; ai.y+=dy; updateAI();
+  moveBuddyNearAI();
+}
+
+function moveBuddyNearAI(){
+  buddy.x += ((ai.x+70)-buddy.x)*0.35;
+  buddy.y += ((ai.y+20)-buddy.y)*0.35;
+  updateBuddy();
+}
 
 function randomStep(times){
   for(let i=0;i<times;i++){
@@ -330,7 +387,7 @@ function randomStep(times){
 
 function aiExplore(){
   if(exploreTimer){clearInterval(exploreTimer);exploreTimer=null;worldSay("Stopped exploring.");return;}
-  worldSay("Started exploring by myself.");
+  worldSay("Started exploring together.");
   exploreTimer=setInterval(exploreActivity,900);
 }
 
@@ -340,11 +397,11 @@ function dropOrb(){
   orb.className="orb"; orb.textContent="💭";
   orb.style.left=(ai.x+55)+"px"; orb.style.top=(ai.y+10)+"px";
   world3d.appendChild(orb);
-  memories.push("A memory orb was created in the world.");
+  memories.push("A memory orb was created with "+friend.name+".");
   localStorage.setItem("living_memories",JSON.stringify(memories));
   renderMemories();
-  worldSay("Created a memory orb.");
-  maybeSpeak(["I made a memory orb.", "I’ll keep this here."]);
+  worldSay("Created a memory orb together.");
+  maybeSpeak(["We made a memory orb.", "We’ll keep this here."]);
 }
 
 function plantFlower(){
@@ -353,8 +410,8 @@ function plantFlower(){
   f.className="flower"; f.textContent=["🌸","🌼","🌻","🌷"][Math.floor(Math.random()*4)];
   f.style.left=(ai.x+45)+"px"; f.style.top=(ai.y+25)+"px";
   world3d.appendChild(f);
-  worldSay("Planted something in the world.");
-  maybeSpeak(["I planted something.", "This place looks a little nicer now."]);
+  worldSay("Planted something with "+friend.name+".");
+  maybeSpeak(["We planted something.", "This place looks a little nicer now."]);
 }
 
 function makeStars(){
@@ -401,6 +458,11 @@ function maybeSpeak(lines, force=false){
   if(!voiceUnlocked)return;
   if(!force && Math.random()>0.45)return;
   const line=lines[Math.floor(Math.random()*lines.length)];
+  speak(line);
+}
+
+function speak(line){
+  if(!voiceUnlocked)return;
   if(!("speechSynthesis" in window))return;
   speechSynthesis.cancel();
   const s=new SpeechSynthesisUtterance(line);
@@ -420,6 +482,7 @@ function safe(str){
   return String(str).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
 }
 
+saveFriend();
 renderMemories();
 renderJournal();
 renderStats();
