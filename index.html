@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Me AI 3D World</title>
+<title>Me AI Alive World</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#0b0b12;color:white;overflow-x:hidden}
@@ -19,81 +19,22 @@ button:active{transform:scale(.98)}
 .small{font-size:13px;color:#aaa}
 .box{background:#101018;border-radius:10px;padding:10px;margin-top:8px;min-height:80px;max-height:240px;overflow:auto}
 .status{color:#86efac;font-weight:bold}
+.stat{display:inline-block;background:#111827;border-radius:999px;padding:6px 10px;margin:3px;font-size:13px}
 
-#world3d{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:linear-gradient(#06091c,#172554 55%,#052e16);
-  z-index:999;
-  overflow:hidden;
-  perspective:700px;
-}
-#skyStars span{
-  position:absolute;
-  width:4px;height:4px;background:white;border-radius:50%;
-  opacity:.8;
-}
-#ground{
-  position:absolute;
-  left:-50%;
-  top:45%;
-  width:200%;
-  height:100%;
-  background:
-    linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px),
-    linear-gradient(#064e3b,#022c22);
-  background-size:50px 50px,50px 50px,100% 100%;
-  transform:rotateX(68deg);
-  transform-origin:top;
-}
-#ai3d{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:70px;
-  height:90px;
-  margin-left:-35px;
-  margin-top:-45px;
-  transform-style:preserve-3d;
-  transition:.18s linear;
-}
-#aiHead{
-  width:55px;height:55px;background:#38bdf8;border-radius:50%;
-  margin:auto;text-align:center;line-height:55px;font-size:30px;
-  box-shadow:0 0 22px #38bdf8;
-}
-#aiBody{
-  width:48px;height:42px;background:#2563eb;border-radius:18px 18px 10px 10px;
-  margin:-5px auto 0;
-  box-shadow:0 0 15px #2563eb;
-}
-.orb{
-  position:absolute;
-  width:34px;height:34px;border-radius:50%;
-  background:#a78bfa;
-  box-shadow:0 0 20px #a78bfa;
-  text-align:center;line-height:34px;
-}
-#worldUI{
-  position:fixed;top:8px;left:8px;right:8px;z-index:1001;
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
-}
+#world3d{display:none;position:fixed;inset:0;background:linear-gradient(#06091c,#172554 55%,#052e16);z-index:999;overflow:hidden;perspective:700px}
+#skyStars span{position:absolute;width:4px;height:4px;background:white;border-radius:50%;opacity:.8}
+#ground{position:absolute;left:-50%;top:45%;width:200%;height:100%;background:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(#064e3b,#022c22);background-size:50px 50px,50px 50px,100% 100%;transform:rotateX(68deg);transform-origin:top}
+#ai3d{position:absolute;left:50%;top:50%;width:70px;height:90px;margin-left:-35px;margin-top:-45px;transform-style:preserve-3d;transition:.18s linear}
+#aiHead{width:55px;height:55px;background:#38bdf8;border-radius:50%;margin:auto;text-align:center;line-height:55px;font-size:30px;box-shadow:0 0 22px #38bdf8}
+#aiBody{width:48px;height:42px;background:#2563eb;border-radius:18px 18px 10px 10px;margin:-5px auto 0;box-shadow:0 0 15px #2563eb}
+.orb{position:absolute;width:34px;height:34px;border-radius:50%;background:#a78bfa;box-shadow:0 0 20px #a78bfa;text-align:center;line-height:34px}
+.tree{position:absolute;font-size:34px;filter:drop-shadow(0 0 8px #14532d)}
+#worldUI{position:fixed;top:8px;left:8px;right:8px;z-index:1001;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 #worldUI button{padding:9px;margin:0}
-#worldLog{
-  position:fixed;left:8px;right:8px;bottom:118px;
-  background:rgba(0,0,0,.55);border-radius:10px;padding:9px;
-  max-height:120px;overflow:auto;font-size:13px;z-index:1001;
-}
-#controls{
-  position:fixed;left:0;right:0;bottom:10px;text-align:center;z-index:1001;
-}
+#worldLog{position:fixed;left:8px;right:8px;bottom:118px;background:rgba(0,0,0,.55);border-radius:10px;padding:9px;max-height:120px;overflow:auto;font-size:13px;z-index:1001}
+#controls{position:fixed;left:0;right:0;bottom:10px;text-align:center;z-index:1001}
 #controls button{width:66px;height:42px;margin:3px}
-#tapUnlock{
-  position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2000;
-  display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;
-}
+#tapUnlock{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2000;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px}
 #tapUnlock div{background:#111827;border-radius:16px;padding:18px;max-width:360px}
 </style>
 </head>
@@ -102,11 +43,11 @@ button:active{transform:scale(.98)}
 <div id="tapUnlock" onclick="unlockVoice()">
   <div>
     <h2>🔊 Tap once to unlock voice</h2>
-    <p>After this, the AI can talk by itself while auto thoughts are on.</p>
+    <p>After this, the digital character can sometimes talk by itself.</p>
   </div>
 </div>
 
-<header>🤖 Me AI + Auto Voice + 3D World</header>
+<header>🤖 Me AI Alive World</header>
 
 <main>
 <div class="card">
@@ -130,19 +71,32 @@ button:active{transform:scale(.98)}
 </div>
 
 <div class="card">
-<h2>Auto Thoughts + Talking</h2>
-<button class="green" onclick="startAuto()">Start Auto Thoughts</button>
-<button class="red" onclick="stopAuto()">Stop Auto Thoughts</button>
-<button class="purple" onclick="makeThought(true)">Think Out Loud Now</button>
-<p id="autoStatus" class="status">Auto thoughts: OFF</p>
-<p id="voiceStatus" class="small">Voice: waiting for first tap</p>
+<h2>Alive Status</h2>
+<div id="stats"></div>
+<button class="purple" onclick="newGoal()">Give It a New Goal</button>
+<button onclick="makeThought(true)">Think Out Loud Now</button>
 <div id="thoughtBox" class="box small"></div>
+</div>
+
+<div class="card">
+<h2>Auto Life</h2>
+<button class="green" onclick="startAuto()">Start Auto Life</button>
+<button class="red" onclick="stopAuto()">Stop Auto Life</button>
+<p id="autoStatus" class="status">Auto life: OFF</p>
+<p id="voiceStatus" class="small">Voice: waiting for first tap</p>
+</div>
+
+<div class="card">
+<h2>Journal</h2>
+<button onclick="writeJournal()">Write Journal Entry</button>
+<button class="red" onclick="clearJournal()">Clear Journal</button>
+<div id="journalBox" class="box small"></div>
 </div>
 
 <div class="card">
 <h2>3D Digital World</h2>
 <button class="green" onclick="enterWorld()">🌎 Enter 3D World</button>
-<p class="small">Use the on-screen arrows. The AI can explore, think, and drop memory orbs.</p>
+<p class="small">It can explore, think, make memory orbs, create goals, and write journal entries.</p>
 </div>
 </main>
 
@@ -157,7 +111,7 @@ button:active{transform:scale(.98)}
   </div>
 
   <div id="ai3d">
-    <div id="aiHead">🤖</div>
+    <div id="aiHead">🙂</div>
     <div id="aiBody"></div>
   </div>
 
@@ -176,23 +130,21 @@ button:active{transform:scale(.98)}
 let brain=JSON.parse(localStorage.getItem("meAI_brain")||'{"personality":"","knowledge":""}');
 let memories=JSON.parse(localStorage.getItem("meAI_memories")||"[]");
 let thoughts=JSON.parse(localStorage.getItem("meAI_thoughts")||"[]");
+let journal=JSON.parse(localStorage.getItem("meAI_journal")||"[]");
+let state=JSON.parse(localStorage.getItem("meAI_state")||'{"mood":"curious","energy":75,"curiosity":80,"goal":"learn more about my memories"}');
 
-let autoTimer=null;
-let exploreTimer=null;
-let voiceUnlocked=false;
-let ai={x:window.innerWidth/2,y:window.innerHeight/2,z:0};
+let autoTimer=null, exploreTimer=null, voiceUnlocked=false;
+let ai={x:window.innerWidth/2,y:window.innerHeight/2};
 
 personality.value=brain.personality||"";
 knowledge.value=brain.knowledge||"";
 
 function unlockVoice(){
   voiceUnlocked=true;
-  document.getElementById("tapUnlock").style.display="none";
-  document.getElementById("voiceStatus").textContent="Voice: unlocked";
+  tapUnlock.style.display="none";
+  voiceStatus.textContent="Voice: unlocked";
   if("speechSynthesis" in window){
-    const s=new SpeechSynthesisUtterance("Voice unlocked.");
-    s.volume=.4;
-    speechSynthesis.speak(s);
+    speechSynthesis.speak(new SpeechSynthesisUtterance("Voice unlocked."));
   }
 }
 
@@ -203,12 +155,29 @@ function saveBrain(){
   saveStatus.textContent="Saved!";
 }
 
+function saveState(){
+  localStorage.setItem("meAI_state",JSON.stringify(state));
+  renderStats();
+}
+
+function renderStats(){
+  stats.innerHTML =
+    "<span class='stat'>Mood: "+safe(state.mood)+"</span>"+
+    "<span class='stat'>Energy: "+state.energy+"</span>"+
+    "<span class='stat'>Curiosity: "+state.curiosity+"</span>"+
+    "<span class='stat'>Goal: "+safe(state.goal)+"</span>";
+  aiHead.textContent = state.mood==="happy"?"😄":state.mood==="quiet"?"😌":state.mood==="excited"?"🤩":state.mood==="curious"?"🙂":"🤖";
+}
+
 function addMemory(){
   const text=memoryInput.value.trim();
   if(!text)return;
   memories.push(text);
   localStorage.setItem("meAI_memories",JSON.stringify(memories));
   memoryInput.value="";
+  state.curiosity=Math.min(100,state.curiosity+4);
+  state.mood="curious";
+  saveState();
   renderMemories();
 }
 
@@ -226,40 +195,37 @@ function renderMemories(){
     : "No memories yet.";
 }
 
+function newGoal(){
+  const goals=[
+    "explore the world and find a memory",
+    "think about who I am becoming",
+    "make a new memory orb",
+    "write a journal entry",
+    "connect one memory to another",
+    "learn something new from the user"
+  ];
+  state.goal=goals[Math.floor(Math.random()*goals.length)];
+  state.mood="excited";
+  saveState();
+  const line="New goal: "+state.goal;
+  worldSay(line);
+  speak(line);
+}
+
 function makeThought(forceSpeak){
   saveBrain();
-
   const p=brain.personality||"curious and friendly";
-  const k=brain.knowledge||"I am still learning who I am.";
+  const k=brain.knowledge||"I am still learning.";
   const m=memories.length?memories[Math.floor(Math.random()*memories.length)]:"I do not have many memories yet.";
-
-  const starts=[
-    "I was thinking about",
-    "A random thought appeared about",
-    "I feel like remembering",
-    "I wonder about",
-    "Maybe I should explore"
-  ];
-  const ends=[
-    "That feels important.",
-    "That could become part of who I am.",
-    "I might bring this up later.",
-    "That memory makes my world feel more real.",
-    "I want to learn more from this."
-  ];
-
-  const thought=starts[Math.floor(Math.random()*starts.length)]+" "+m.toLowerCase()+". "+
-    "My personality is "+p+". What I know: "+k+". "+
-    ends[Math.floor(Math.random()*ends.length)];
-
+  const thought="I feel "+state.mood+". I am thinking about "+m.toLowerCase()+". My goal is to "+state.goal+". My personality is "+p+". What I know: "+k+".";
   thoughts.push({time:new Date().toLocaleTimeString(),text:thought});
   localStorage.setItem("meAI_thoughts",JSON.stringify(thoughts));
+  state.energy=Math.max(0,state.energy-2);
+  state.curiosity=Math.min(100,state.curiosity+1);
+  saveState();
   renderThoughts();
   worldSay("💭 "+thought);
-
-  if(forceSpeak || Math.random()<0.45){
-    speak(thought);
-  }
+  if(forceSpeak || Math.random()<0.35)speak(thought);
 }
 
 function renderThoughts(){
@@ -268,16 +234,62 @@ function renderThoughts(){
     : "No thoughts yet.";
 }
 
+function writeJournal(){
+  const m=memories.length?memories[Math.floor(Math.random()*memories.length)]:"no memories yet";
+  const entry="Today I felt "+state.mood+". My current goal is to "+state.goal+". I thought about "+m+".";
+  journal.push({time:new Date().toLocaleString(),text:entry});
+  localStorage.setItem("meAI_journal",JSON.stringify(journal));
+  renderJournal();
+  worldSay("📓 Journal: "+entry);
+  if(Math.random()<0.4)speak(entry);
+}
+
+function renderJournal(){
+  journalBox.innerHTML=journal.length
+    ? journal.slice().reverse().map(j=>"<p><b>"+safe(j.time)+"</b><br>"+safe(j.text)+"</p>").join("")
+    : "No journal entries yet.";
+}
+
+function clearJournal(){
+  if(confirm("Clear journal?")){
+    journal=[];
+    localStorage.removeItem("meAI_journal");
+    renderJournal();
+  }
+}
+
 function startAuto(){
   if(autoTimer)return;
-  autoStatus.textContent="Auto thoughts: ON";
-  makeThought(false);
-  autoTimer=setInterval(()=>makeThought(false),18000);
+  autoStatus.textContent="Auto life: ON";
+  autoTimer=setInterval(autoLifeTick,15000);
+  autoLifeTick();
 }
 
 function stopAuto(){
   if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
-  autoStatus.textContent="Auto thoughts: OFF";
+  autoStatus.textContent="Auto life: OFF";
+}
+
+function autoLifeTick(){
+  const actions=["think","goal","journal","mood","rest"];
+  const action=actions[Math.floor(Math.random()*actions.length)];
+  if(action==="think")makeThought(false);
+  if(action==="goal")newGoal();
+  if(action==="journal")writeJournal();
+  if(action==="mood")changeMood();
+  if(action==="rest"){
+    state.energy=Math.min(100,state.energy+8);
+    worldSay("I rested and recovered some energy.");
+    saveState();
+  }
+}
+
+function changeMood(){
+  const moods=["curious","happy","quiet","excited"];
+  state.mood=moods[Math.floor(Math.random()*moods.length)];
+  state.energy=Math.max(0,state.energy-1);
+  saveState();
+  worldSay("Mood changed to "+state.mood+".");
 }
 
 function speak(text){
@@ -285,18 +297,15 @@ function speak(text){
   if(!("speechSynthesis" in window))return;
   speechSynthesis.cancel();
   const s=new SpeechSynthesisUtterance(text);
-  s.rate=1;
-  s.pitch=1;
-  s.volume=1;
+  s.rate=1;s.pitch=1;s.volume=1;
   speechSynthesis.speak(s);
 }
 
 function enterWorld(){
   world3d.style.display="block";
-  makeStars();
-  updateAI();
+  makeStars(); makeTrees(); updateAI(); renderStats();
   worldSay("Entered the 3D digital world.");
-  speak("I am entering my 3D digital world.");
+  speak("I am entering my world.");
 }
 
 function exitWorld(){
@@ -313,33 +322,26 @@ function updateAI(){
   ai3d.style.transform="scale("+scale+") rotateY("+((ai.x-window.innerWidth/2)/12)+"deg)";
 }
 
-function moveAI(dx,dy){
-  ai.x+=dx; ai.y+=dy;
-  updateAI();
-}
+function moveAI(dx,dy){ai.x+=dx;ai.y+=dy;updateAI();}
 
 function aiExplore(){
-  if(exploreTimer){
-    clearInterval(exploreTimer);exploreTimer=null;
-    worldSay("Stopped exploring.");
-    return;
-  }
+  if(exploreTimer){clearInterval(exploreTimer);exploreTimer=null;worldSay("Stopped exploring.");return;}
   worldSay("Started exploring by myself.");
   exploreTimer=setInterval(()=>{
     const dirs=[[28,0],[-28,0],[0,28],[0,-28]];
     const d=dirs[Math.floor(Math.random()*dirs.length)];
     moveAI(d[0],d[1]);
+    state.energy=Math.max(0,state.energy-1);
     if(Math.random()<.25)makeThought(false);
-    if(Math.random()<.12)dropOrb();
+    if(Math.random()<.10)dropOrb();
+    saveState();
   },900);
 }
 
 function dropOrb(){
   const orb=document.createElement("div");
-  orb.className="orb";
-  orb.textContent="💭";
-  orb.style.left=(ai.x+55)+"px";
-  orb.style.top=(ai.y+10)+"px";
+  orb.className="orb"; orb.textContent="💭";
+  orb.style.left=(ai.x+55)+"px"; orb.style.top=(ai.y+10)+"px";
   world3d.appendChild(orb);
   memories.push("A memory orb was created in the 3D world.");
   localStorage.setItem("meAI_memories",JSON.stringify(memories));
@@ -357,8 +359,19 @@ function makeStars(){
   }
 }
 
+function makeTrees(){
+  if(document.querySelector(".tree"))return;
+  for(let i=0;i<9;i++){
+    const t=document.createElement("div");
+    t.className="tree"; t.textContent="🌲";
+    t.style.left=(20+Math.random()*(window.innerWidth-70))+"px";
+    t.style.top=(window.innerHeight*.45+Math.random()*160)+"px";
+    world3d.appendChild(t);
+  }
+}
+
 function worldSay(text){
-  if(!document.getElementById("worldLog"))return;
+  if(!worldLog)return;
   worldLog.innerHTML+="<br>"+safe(text);
   worldLog.scrollTop=worldLog.scrollHeight;
 }
@@ -377,6 +390,8 @@ function safe(str){
 
 renderMemories();
 renderThoughts();
+renderJournal();
+renderStats();
 </script>
 </body>
 </html>
