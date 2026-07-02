@@ -1,504 +1,382 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title> self copier </title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Me AI 3D World</title>
 <style>
-body{font-family:Arial;margin:0;background:#111;color:#fff}
-header{padding:16px;background:#222;text-align:center;font-size:24px;font-weight:bold}
-main{max-width:850px;margin:auto;padding:16px}
-.card{background:#1f1f1f;border-radius:14px;padding:16px;margin-bottom:16px}
-textarea,input,button{width:100%;box-sizing:border-box;padding:11px;margin-top:8px;border-radius:9px;border:none;font-size:16px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#0b0b12;color:white;overflow-x:hidden}
+header{padding:16px;background:#181827;text-align:center;font-size:24px;font-weight:bold}
+main{max-width:900px;margin:auto;padding:15px}
+.card{background:#1a1a27;border-radius:14px;padding:15px;margin-bottom:15px}
+textarea,input,button{width:100%;padding:11px;margin-top:8px;border-radius:9px;border:none;font-size:16px}
 textarea{min-height:90px}
 button{background:#3478f6;color:white;font-weight:bold}
 button:active{transform:scale(.98)}
-.small{color:#aaa;font-size:13px}
-.msg{padding:10px;margin:8px 0;border-radius:9px}
-.user{background:#2563eb;text-align:right}
-.ai{background:#333}
-#chat{height:260px;overflow:auto;background:#000;padding:10px;border-radius:10px}
-.preview{max-width:100%;max-height:240px;border-radius:9px;margin-top:8px;display:block}
-.mediaItem{background:#111;padding:10px;border-radius:10px;margin-top:10px}
-.red{background:#9b1c1c}
-.green{background:#16803c}
-.purple{background:#6d28d9}
+.red{background:#9b1c1c}.green{background:#16803c}.purple{background:#6d28d9}
+.small{font-size:13px;color:#aaa}
+.box{background:#101018;border-radius:10px;padding:10px;margin-top:8px;min-height:80px;max-height:240px;overflow:auto}
+.status{color:#86efac;font-weight:bold}
 
-#world{
+#world3d{
   display:none;
   position:fixed;
   inset:0;
-  background:linear-gradient(#06111f,#18345e);
+  background:linear-gradient(#06091c,#172554 55%,#052e16);
   z-index:999;
   overflow:hidden;
-  color:white;
+  perspective:700px;
 }
-#worldTop{
-  position:fixed;
-  top:8px;
-  left:8px;
-  right:8px;
-  z-index:1002;
-  display:flex;
-  gap:6px;
-}
-#worldTop button{width:auto;padding:9px}
-#worldLog{
-  position:fixed;
-  left:8px;
-  right:8px;
-  bottom:115px;
-  max-height:110px;
-  overflow:auto;
-  background:rgba(0,0,0,.45);
-  border-radius:10px;
-  padding:8px;
-  font-size:13px;
-  z-index:1002;
-}
-#aiCharacter{
+#skyStars span{
   position:absolute;
-  width:48px;
-  height:48px;
-  background:#38bdf8;
-  border-radius:50%;
-  left:150px;
-  top:170px;
-  text-align:center;
-  line-height:48px;
-  font-size:24px;
-  box-shadow:0 0 18px #38bdf8;
-}
-.star{
-  position:absolute;
-  width:6px;
-  height:6px;
-  background:white;
-  border-radius:50%;
+  width:4px;height:4px;background:white;border-radius:50%;
   opacity:.8;
 }
-.memoryOrb{
+#ground{
   position:absolute;
-  width:34px;
-  height:34px;
+  left:-50%;
+  top:45%;
+  width:200%;
+  height:100%;
+  background:
+    linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px),
+    linear-gradient(#064e3b,#022c22);
+  background-size:50px 50px,50px 50px,100% 100%;
+  transform:rotateX(68deg);
+  transform-origin:top;
+}
+#ai3d{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:70px;
+  height:90px;
+  margin-left:-35px;
+  margin-top:-45px;
+  transform-style:preserve-3d;
+  transition:.18s linear;
+}
+#aiHead{
+  width:55px;height:55px;background:#38bdf8;border-radius:50%;
+  margin:auto;text-align:center;line-height:55px;font-size:30px;
+  box-shadow:0 0 22px #38bdf8;
+}
+#aiBody{
+  width:48px;height:42px;background:#2563eb;border-radius:18px 18px 10px 10px;
+  margin:-5px auto 0;
+  box-shadow:0 0 15px #2563eb;
+}
+.orb{
+  position:absolute;
+  width:34px;height:34px;border-radius:50%;
   background:#a78bfa;
-  border-radius:50%;
-  box-shadow:0 0 15px #a78bfa;
-  text-align:center;
-  line-height:34px;
+  box-shadow:0 0 20px #a78bfa;
+  text-align:center;line-height:34px;
+}
+#worldUI{
+  position:fixed;top:8px;left:8px;right:8px;z-index:1001;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
+}
+#worldUI button{padding:9px;margin:0}
+#worldLog{
+  position:fixed;left:8px;right:8px;bottom:118px;
+  background:rgba(0,0,0,.55);border-radius:10px;padding:9px;
+  max-height:120px;overflow:auto;font-size:13px;z-index:1001;
 }
 #controls{
-  position:fixed;
-  bottom:12px;
-  left:0;
-  right:0;
-  text-align:center;
-  z-index:1002;
+  position:fixed;left:0;right:0;bottom:10px;text-align:center;z-index:1001;
 }
-#controls button{
-  width:64px;
-  height:42px;
-  margin:3px;
+#controls button{width:66px;height:42px;margin:3px}
+#tapUnlock{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2000;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;
 }
+#tapUnlock div{background:#111827;border-radius:16px;padding:18px;max-width:360px}
 </style>
 </head>
 <body>
 
-<header>🤖 Me AI World</header>
+<div id="tapUnlock" onclick="unlockVoice()">
+  <div>
+    <h2>🔊 Tap once to unlock voice</h2>
+    <p>After this, the AI can talk by itself while auto thoughts are on.</p>
+  </div>
+</div>
+
+<header>🤖 Me AI + Auto Voice + 3D World</header>
 
 <main>
-
 <div class="card">
-<h2>1. Personality</h2>
-<textarea id="personality" placeholder="How should the AI act? Example: funny, chill, short answers, says bro, likes cats"></textarea>
-<button onclick="saveBrain()">Save Personality</button>
+<h2>Personality</h2>
+<textarea id="personality" placeholder="Example: funny, chill, curious, short answers, talks like me"></textarea>
 </div>
 
 <div class="card">
-<h2>2. What I Know</h2>
-<textarea id="knowledge" placeholder="Add what the AI knows about you. Example: I like Warrior Cats. My favorite is Firestar. I make websites."></textarea>
-<button onclick="saveBrain()">Save What I Know</button>
+<h2>What I Know</h2>
+<textarea id="knowledge" placeholder="Example: I like Warrior Cats. My favorite is Firestar. I make websites."></textarea>
+<button onclick="saveBrain()">Save Personality & Knowledge</button>
 <p id="saveStatus" class="small"></p>
 </div>
 
 <div class="card">
-<h2>3. Photos / Videos for Memories</h2>
-<input type="file" id="mediaInput" accept="image/*,video/*" multiple>
-<button onclick="addMedia()">Add Media</button>
-<button class="red" onclick="clearMedia()">Clear Media</button>
-<p id="mediaCountText" class="small"></p>
-<div id="mediaBox"></div>
-<p class="small">This keeps media as live previews only. It saves the file names as memories, not the full videos, so Koder/iPhone should not crash as easily.</p>
-</div>
-
-<div class="card">
-<h2>4. Memories</h2>
-<button onclick="showMemories()">Show Memories</button>
+<h2>Memories</h2>
+<input id="memoryInput" placeholder="Type a memory, then press Add Memory">
+<button onclick="addMemory()">Add Memory</button>
 <button class="red" onclick="clearMemories()">Clear Memories</button>
-<div id="memoryList" class="small" style="background:#111;border-radius:10px;padding:10px;margin-top:8px"></div>
-<p class="small">Try saying: “remember I like cats”, “I love pizza”, “my favorite color is blue”, or “I am funny”.</p>
+<div id="memoryBox" class="box small"></div>
 </div>
 
 <div class="card">
-<h2>5. Chat</h2>
-<div id="chat"></div>
-<input id="userText" placeholder="Talk to your AI..." onkeydown="if(event.key==='Enter')sendMessage()">
-<button onclick="sendMessage()">Send</button>
-<button class="green" onclick="enterWorld()">🌎 Enter Digital World</button>
+<h2>Auto Thoughts + Talking</h2>
+<button class="green" onclick="startAuto()">Start Auto Thoughts</button>
+<button class="red" onclick="stopAuto()">Stop Auto Thoughts</button>
+<button class="purple" onclick="makeThought(true)">Think Out Loud Now</button>
+<p id="autoStatus" class="status">Auto thoughts: OFF</p>
+<p id="voiceStatus" class="small">Voice: waiting for first tap</p>
+<div id="thoughtBox" class="box small"></div>
 </div>
 
 <div class="card">
-<h2>6. Make It Talk</h2>
-<textarea id="speakText" placeholder="Type what your AI should say"></textarea>
-<button class="purple" onclick="talk()">Speak</button>
+<h2>3D Digital World</h2>
+<button class="green" onclick="enterWorld()">🌎 Enter 3D World</button>
+<p class="small">Use the on-screen arrows. The AI can explore, think, and drop memory orbs.</p>
 </div>
-
 </main>
 
-<div id="world">
-  <div id="worldTop">
+<div id="world3d">
+  <div id="skyStars"></div>
+  <div id="ground"></div>
+
+  <div id="worldUI">
     <button onclick="exitWorld()">Exit</button>
-    <button onclick="aiThink()">Think</button>
     <button onclick="aiExplore()">Explore</button>
-    <button onclick="dropMemoryOrb()">Memory Orb</button>
+    <button onclick="dropOrb()">Memory Orb</button>
   </div>
 
-  <div id="aiCharacter">🤖</div>
-  <div id="worldLog">Welcome to the digital world.</div>
+  <div id="ai3d">
+    <div id="aiHead">🤖</div>
+    <div id="aiBody"></div>
+  </div>
+
+  <div id="worldLog">3D world loaded.</div>
 
   <div id="controls">
-    <button onclick="moveAI(0,-24)">⬆️</button><br>
-    <button onclick="moveAI(-24,0)">⬅️</button>
-    <button onclick="moveAI(24,0)">➡️</button><br>
-    <button onclick="moveAI(0,24)">⬇️</button>
+    <button onclick="moveAI(0,-28)">⬆️</button><br>
+    <button onclick="moveAI(-28,0)">⬅️</button>
+    <button onclick="makeThought(true)">💭</button>
+    <button onclick="moveAI(28,0)">➡️</button><br>
+    <button onclick="moveAI(0,28)">⬇️</button>
   </div>
 </div>
 
 <script>
-const MAX_MEDIA = 10;
+let brain=JSON.parse(localStorage.getItem("meAI_brain")||'{"personality":"","knowledge":""}');
+let memories=JSON.parse(localStorage.getItem("meAI_memories")||"[]");
+let thoughts=JSON.parse(localStorage.getItem("meAI_thoughts")||"[]");
 
-let brain = JSON.parse(localStorage.getItem("meAI_brain") || '{"personality":"","knowledge":""}');
-let memories = JSON.parse(localStorage.getItem("meAI_memories") || "[]");
-let mediaCount = 0;
-let mediaUrls = [];
-let ai = {x:150,y:170};
-let wanderTimer = null;
+let autoTimer=null;
+let exploreTimer=null;
+let voiceUnlocked=false;
+let ai={x:window.innerWidth/2,y:window.innerHeight/2,z:0};
 
-document.getElementById("personality").value = brain.personality || "";
-document.getElementById("knowledge").value = brain.knowledge || "";
+personality.value=brain.personality||"";
+knowledge.value=brain.knowledge||"";
+
+function unlockVoice(){
+  voiceUnlocked=true;
+  document.getElementById("tapUnlock").style.display="none";
+  document.getElementById("voiceStatus").textContent="Voice: unlocked";
+  if("speechSynthesis" in window){
+    const s=new SpeechSynthesisUtterance("Voice unlocked.");
+    s.volume=.4;
+    speechSynthesis.speak(s);
+  }
+}
 
 function saveBrain(){
-  brain.personality = document.getElementById("personality").value;
-  brain.knowledge = document.getElementById("knowledge").value;
-  localStorage.setItem("meAI_brain", JSON.stringify(brain));
-  document.getElementById("saveStatus").textContent = "Saved!";
+  brain.personality=personality.value;
+  brain.knowledge=knowledge.value;
+  localStorage.setItem("meAI_brain",JSON.stringify(brain));
+  saveStatus.textContent="Saved!";
 }
 
-function addMedia(){
-  const input = document.getElementById("mediaInput");
-  const files = input.files;
-  const box = document.getElementById("mediaBox");
-
-  if(!files || files.length === 0){
-    alert("Pick photos or videos first.");
-    return;
-  }
-
-  for(const file of files){
-    if(mediaCount >= MAX_MEDIA){
-      alert("Limit reached: 10 media items. Clear media before adding more.");
-      break;
-    }
-
-    if(!file.type.startsWith("image/") && !file.type.startsWith("video/")){
-      continue;
-    }
-
-    const url = URL.createObjectURL(file);
-    mediaUrls.push(url);
-
-    const wrap = document.createElement("div");
-    wrap.className = "mediaItem";
-
-    const title = document.createElement("p");
-    title.className = "small";
-    title.textContent = file.name;
-    wrap.appendChild(title);
-
-    if(file.type.startsWith("image/")){
-      const img = document.createElement("img");
-      img.src = url;
-      img.className = "preview";
-      wrap.appendChild(img);
-      saveMemory("Photo memory added: " + file.name);
-    }else{
-      const video = document.createElement("video");
-      video.src = url;
-      video.controls = true;
-      video.playsInline = true;
-      video.className = "preview";
-      wrap.appendChild(video);
-      saveMemory("Video memory added: " + file.name);
-    }
-
-    const remove = document.createElement("button");
-    remove.className = "red";
-    remove.textContent = "Remove This";
-    remove.onclick = function(){
-      URL.revokeObjectURL(url);
-      wrap.remove();
-      mediaCount--;
-      updateMediaCount();
-    };
-    wrap.appendChild(remove);
-
-    box.appendChild(wrap);
-    mediaCount++;
-  }
-
-  input.value = "";
-  updateMediaCount();
-  showMemories();
-}
-
-function updateMediaCount(){
-  document.getElementById("mediaCountText").textContent = mediaCount + "/" + MAX_MEDIA + " photo/video previews loaded";
-}
-
-function clearMedia(){
-  for(const url of mediaUrls){ URL.revokeObjectURL(url); }
-  mediaUrls = [];
-  mediaCount = 0;
-  document.getElementById("mediaBox").innerHTML = "";
-  updateMediaCount();
-}
-
-function saveMemory(memory){
-  memory = String(memory || "").trim();
-  if(!memory) return;
-  if(memories.includes(memory)) return;
-  memories.push(memory);
-  localStorage.setItem("meAI_memories", JSON.stringify(memories));
-}
-
-function learnFromMessage(text){
-  const lower = text.toLowerCase();
-
-  if(lower.startsWith("remember ")){
-    saveMemory(text.slice(9));
-  }else if(lower.startsWith("i like ")){
-    saveMemory("I like " + text.slice(7));
-  }else if(lower.startsWith("i love ")){
-    saveMemory("I love " + text.slice(7));
-  }else if(lower.startsWith("my favorite ")){
-    saveMemory(text);
-  }else if(lower.startsWith("i am ")){
-    saveMemory("I am " + text.slice(5));
-  }else if(lower.startsWith("i have ")){
-    saveMemory("I have " + text.slice(7));
-  }
-}
-
-function showMemories(){
-  const list = document.getElementById("memoryList");
-  if(memories.length === 0){
-    list.innerHTML = "No memories yet.";
-    return;
-  }
-  list.innerHTML = memories.map((m,i)=>(i+1)+". "+escapeHTML(m)).join("<br>");
+function addMemory(){
+  const text=memoryInput.value.trim();
+  if(!text)return;
+  memories.push(text);
+  localStorage.setItem("meAI_memories",JSON.stringify(memories));
+  memoryInput.value="";
+  renderMemories();
 }
 
 function clearMemories(){
   if(confirm("Clear all memories?")){
-    memories = [];
+    memories=[];
     localStorage.removeItem("meAI_memories");
-    showMemories();
+    renderMemories();
   }
 }
 
-function escapeHTML(str){
-  return String(str).replace(/[&<>"']/g, function(c){
-    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c];
-  });
+function renderMemories(){
+  memoryBox.innerHTML=memories.length
+    ? memories.map((m,i)=>"<p><b>"+(i+1)+".</b> "+safe(m)+"</p>").join("")
+    : "No memories yet.";
 }
 
-function addMessage(text, who){
-  const chat = document.getElementById("chat");
-  const div = document.createElement("div");
-  div.className = "msg " + who;
-  div.textContent = text;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
+function makeThought(forceSpeak){
+  saveBrain();
 
-function sendMessage(){
-  const input = document.getElementById("userText");
-  const text = input.value.trim();
-  if(!text) return;
+  const p=brain.personality||"curious and friendly";
+  const k=brain.knowledge||"I am still learning who I am.";
+  const m=memories.length?memories[Math.floor(Math.random()*memories.length)]:"I do not have many memories yet.";
 
-  addMessage(text, "user");
-  input.value = "";
-
-  learnFromMessage(text);
-  showMemories();
-
-  const reply = makeReply(text);
-  addMessage(reply, "ai");
-  speak(reply);
-}
-
-function makeReply(text){
-  const lower = text.toLowerCase();
-  const personality = brain.personality || "normal";
-  const knowledge = brain.knowledge || "nothing yet";
-  const memoryText = memories.length ? memories.slice(-8).join(", ") : "no memories yet";
-
-  if(lower.includes("what do you remember")){
-    return "I remember: " + memoryText;
-  }
-
-  if(lower.includes("who are you")){
-    return "I’m your Me AI. I use personality, what I know, memories, and my digital world.";
-  }
-
-  if(lower.includes("go to your world") || lower.includes("digital world")){
-    return "Press the Enter Digital World button and I’ll go into my own world.";
-  }
-
-  if(lower.includes("photo") || lower.includes("video")){
-    return "I have " + mediaCount + " media previews loaded. I saved their names as memories.";
-  }
-
-  const starts = [
-    "I would say: ",
-    "Honestly, I think: ",
-    "My answer is: ",
-    "If I was acting like you, I would say: "
+  const starts=[
+    "I was thinking about",
+    "A random thought appeared about",
+    "I feel like remembering",
+    "I wonder about",
+    "Maybe I should explore"
+  ];
+  const ends=[
+    "That feels important.",
+    "That could become part of who I am.",
+    "I might bring this up later.",
+    "That memory makes my world feel more real.",
+    "I want to learn more from this."
   ];
 
-  return starts[Math.floor(Math.random()*starts.length)] + text +
-    ". Personality: " + personality +
-    ". What I know: " + knowledge +
-    ". Memories: " + memoryText;
+  const thought=starts[Math.floor(Math.random()*starts.length)]+" "+m.toLowerCase()+". "+
+    "My personality is "+p+". What I know: "+k+". "+
+    ends[Math.floor(Math.random()*ends.length)];
+
+  thoughts.push({time:new Date().toLocaleTimeString(),text:thought});
+  localStorage.setItem("meAI_thoughts",JSON.stringify(thoughts));
+  renderThoughts();
+  worldSay("💭 "+thought);
+
+  if(forceSpeak || Math.random()<0.45){
+    speak(thought);
+  }
 }
 
-function talk(){
-  const text = document.getElementById("speakText").value.trim();
-  if(!text) return;
-  addMessage(text, "ai");
-  speak(text);
+function renderThoughts(){
+  thoughtBox.innerHTML=thoughts.length
+    ? thoughts.slice().reverse().map(t=>"<p><b>"+safe(t.time||"")+"</b><br>"+safe(t.text||t)+"</p>").join("")
+    : "No thoughts yet.";
+}
+
+function startAuto(){
+  if(autoTimer)return;
+  autoStatus.textContent="Auto thoughts: ON";
+  makeThought(false);
+  autoTimer=setInterval(()=>makeThought(false),18000);
+}
+
+function stopAuto(){
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}
+  autoStatus.textContent="Auto thoughts: OFF";
 }
 
 function speak(text){
-  if(!("speechSynthesis" in window)) return;
+  if(!voiceUnlocked)return;
+  if(!("speechSynthesis" in window))return;
   speechSynthesis.cancel();
-  const s = new SpeechSynthesisUtterance(text);
-  s.rate = 1;
-  s.pitch = 1;
-  s.volume = 1;
+  const s=new SpeechSynthesisUtterance(text);
+  s.rate=1;
+  s.pitch=1;
+  s.volume=1;
   speechSynthesis.speak(s);
 }
 
 function enterWorld(){
-  document.getElementById("world").style.display = "block";
+  world3d.style.display="block";
   makeStars();
   updateAI();
-  worldSay("I entered my digital world.");
+  worldSay("Entered the 3D digital world.");
+  speak("I am entering my 3D digital world.");
 }
 
 function exitWorld(){
-  document.getElementById("world").style.display = "none";
-  if(wanderTimer){
-    clearInterval(wanderTimer);
-    wanderTimer = null;
-  }
+  world3d.style.display="none";
+  if(exploreTimer){clearInterval(exploreTimer);exploreTimer=null;}
 }
 
 function updateAI(){
-  const el = document.getElementById("aiCharacter");
-  ai.x = Math.max(8, Math.min(window.innerWidth - 58, ai.x));
-  ai.y = Math.max(55, Math.min(window.innerHeight - 160, ai.y));
-  el.style.left = ai.x + "px";
-  el.style.top = ai.y + "px";
+  ai.x=Math.max(20,Math.min(window.innerWidth-90,ai.x));
+  ai.y=Math.max(80,Math.min(window.innerHeight-180,ai.y));
+  const scale=1+(ai.y/window.innerHeight)*.55;
+  ai3d.style.left=ai.x+"px";
+  ai3d.style.top=ai.y+"px";
+  ai3d.style.transform="scale("+scale+") rotateY("+((ai.x-window.innerWidth/2)/12)+"deg)";
 }
 
 function moveAI(dx,dy){
-  ai.x += dx;
-  ai.y += dy;
+  ai.x+=dx; ai.y+=dy;
   updateAI();
 }
 
-function aiThink(){
-  const memoryText = memories.length ? memories[Math.floor(Math.random()*memories.length)] : "I need more memories.";
-  const thought = "Thinking... " + memoryText;
-  worldSay(thought);
-  speak(thought);
-}
-
 function aiExplore(){
-  if(wanderTimer){
-    clearInterval(wanderTimer);
-    wanderTimer = null;
-    worldSay("I stopped exploring.");
+  if(exploreTimer){
+    clearInterval(exploreTimer);exploreTimer=null;
+    worldSay("Stopped exploring.");
     return;
   }
-
-  worldSay("I started exploring.");
-  wanderTimer = setInterval(function(){
-    const dirs = [[24,0],[-24,0],[0,24],[0,-24]];
-    const d = dirs[Math.floor(Math.random()*dirs.length)];
-    moveAI(d[0], d[1]);
-
-    if(Math.random() < 0.25){
-      aiThink();
-    }
-  }, 900);
+  worldSay("Started exploring by myself.");
+  exploreTimer=setInterval(()=>{
+    const dirs=[[28,0],[-28,0],[0,28],[0,-28]];
+    const d=dirs[Math.floor(Math.random()*dirs.length)];
+    moveAI(d[0],d[1]);
+    if(Math.random()<.25)makeThought(false);
+    if(Math.random()<.12)dropOrb();
+  },900);
 }
 
-function dropMemoryOrb(){
-  const orb = document.createElement("div");
-  orb.className = "memoryOrb";
-  orb.textContent = "💭";
-  orb.style.left = (ai.x + 55) + "px";
-  orb.style.top = ai.y + "px";
-  document.getElementById("world").appendChild(orb);
-
-  saveMemory("A memory orb was made in the digital world.");
-  showMemories();
-  worldSay("I created a memory orb.");
-}
-
-function worldSay(text){
-  const log = document.getElementById("worldLog");
-  log.innerHTML += "<br>" + escapeHTML(text);
-  log.scrollTop = log.scrollHeight;
+function dropOrb(){
+  const orb=document.createElement("div");
+  orb.className="orb";
+  orb.textContent="💭";
+  orb.style.left=(ai.x+55)+"px";
+  orb.style.top=(ai.y+10)+"px";
+  world3d.appendChild(orb);
+  memories.push("A memory orb was created in the 3D world.");
+  localStorage.setItem("meAI_memories",JSON.stringify(memories));
+  renderMemories();
+  worldSay("Created a memory orb.");
 }
 
 function makeStars(){
-  const world = document.getElementById("world");
-  if(document.querySelector(".star")) return;
-
-  for(let i=0;i<45;i++){
-    const s = document.createElement("div");
-    s.className = "star";
-    s.style.left = Math.random()*window.innerWidth + "px";
-    s.style.top = Math.random()*window.innerHeight + "px";
-    world.appendChild(s);
+  if(document.querySelector("#skyStars span"))return;
+  for(let i=0;i<70;i++){
+    const s=document.createElement("span");
+    s.style.left=Math.random()*window.innerWidth+"px";
+    s.style.top=Math.random()*(window.innerHeight*.5)+"px";
+    skyStars.appendChild(s);
   }
 }
 
-document.addEventListener("keydown", function(e){
-  if(document.getElementById("world").style.display !== "block") return;
+function worldSay(text){
+  if(!document.getElementById("worldLog"))return;
+  worldLog.innerHTML+="<br>"+safe(text);
+  worldLog.scrollTop=worldLog.scrollHeight;
+}
 
-  if(e.key === "ArrowUp") moveAI(0,-24);
-  if(e.key === "ArrowDown") moveAI(0,24);
-  if(e.key === "ArrowLeft") moveAI(-24,0);
-  if(e.key === "ArrowRight") moveAI(24,0);
+document.addEventListener("keydown",e=>{
+  if(world3d.style.display!=="block")return;
+  if(e.key==="ArrowUp")moveAI(0,-28);
+  if(e.key==="ArrowDown")moveAI(0,28);
+  if(e.key==="ArrowLeft")moveAI(-28,0);
+  if(e.key==="ArrowRight")moveAI(28,0);
 });
 
-updateMediaCount();
-showMemories();
-addMessage("Hi. Add my personality, what I know, memories, and photos/videos. Then press Enter Digital World.", "ai");
-</script>
+function safe(str){
+  return String(str).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+}
 
+renderMemories();
+renderThoughts();
+</script>
 </body>
 </html>
